@@ -1,5 +1,7 @@
 #include "helper.h"
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
 void strassen(vector<vector<int>> &strassen_a, vector<vector<int>> &strassen_b, vector<vector<int>> &strassen_c, int size);
 void test(vector<double> &times,int MATRIX_SIZE);
@@ -65,6 +67,16 @@ void test(vector<double> &times,int MATRIX_SIZE){
 
     // TODO
     // implement Brute Force matrix multiplication here
+    for (int i = 0; i < MATRIX_SIZE; i++){
+        for (int j = 0; j < MATRIX_SIZE; j++){
+            matrix_c[i][j] = 0;
+            for (int k = 0; k < MATRIX_SIZE; k++){
+                matrix_c[i][j] += matrix_a[i][k] * matrix_b[k][j];
+            }
+            // printf("%d\t", matrix_c[i][j]);
+        }
+        // printf("\n");
+    }
     
     clock_t end = clock();
     double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
@@ -85,12 +97,39 @@ void test(vector<double> &times,int MATRIX_SIZE){
 	// TODO:
 	// Generate a random vector of indices with the matrix size
 	// look how to use std::random_shuffle
+    vector<int> columns;
+    vector<int> rows;
+    for (int i = 0; i < MATRIX_SIZE; i++){
+        columns.push_back(i);
+        rows.push_back(i);
+    }
+
+    std::random_shuffle(columns.begin(), columns.end());
+    std::random_shuffle(rows.begin(), rows.end());
+
+    vector<vector<int>> vector_C(MATRIX_SIZE, vector<int>(MATRIX_SIZE));
+    vector<vector<int>> vector_R(MATRIX_SIZE, vector<int>(MATRIX_SIZE));
+    vector<vector<int>> vector_RC(MATRIX_SIZE, vector<int>(MATRIX_SIZE));
+
+    for (int i = 0; i < MATRIX_SIZE; i++){
+        for (int j = 0; j < MATRIX_SIZE; j++){
+            vector_C[i][j] = matrix_a[rows[i]][columns[j]];
+            vector_R[i][j] = matrix_b[rows[i]][columns[j]];
+        }
+    }
     
     //create new matrices C and R with the new samples cols and rows, and a new matrix CR to hold the approx product
     // don't forgoet to normalize as we did in the lecture.
 
     //multiply C and R using Brute Force.
-
+    for (int i = 0; i < MATRIX_SIZE; i++){
+        for (int j = 0; j < MATRIX_SIZE; j++){
+            vector_RC[i][j] = 0;
+            for (int k = 0; k < MATRIX_SIZE; k++){
+                vector_RC[i][j] += vector_C[i][k] * vector_R[k][j];
+            }
+        }
+    }
     //end timing
     end = clock();
     std::cout << "New matrix A\n";
@@ -224,10 +263,83 @@ void strassen(vector<vector<int>> &strassen_a, vector<vector<int>> &strassen_b, 
 	
 	
 	// 1. check if the size of the matrix is below the threshold use a threshold of 85 and calcualte that in brute force.
+	if (size < 85){
+        for (int i = 0; i < size; i++){
+            for (int j = 0; j < size; j++){
+                strassen_c[i][j] = 0;
+                for (int k = 0; k < size; k++){
+                    strassen_c[i][j] += strassen_a[i][k] * strassen_b[k][j];
+                }
+            }
+        }
+        //brute force
+        return;
+    }
+    else{
+        // 2. otherwise, you need to make the 8 quadrants matrices out of a and b, fill them out
+        int new_size = size/2;
+        vector<vector<int>> a_top_left(new_size, vector<int>(new_size));
+        vector<vector<int>> a_top_right(new_size, vector<int>(new_size));
+        vector<vector<int>> a_bottom_left(new_size, vector<int>(new_size));
+        vector<vector<int>> a_bottom_right(new_size, vector<int>(new_size));
+        vector<vector<int>> b_top_left(new_size, vector<int>(new_size));
+        vector<vector<int>> b_top_right(new_size, vector<int>(new_size));
+        vector<vector<int>> b_bottom_left(new_size, vector<int>(new_size));
+        vector<vector<int>> b_bottom_right(new_size, vector<int>(new_size));
+
+        for (int i = 0; i < new_size; i++){
+            for (int j = 0; j < new_size; j++){
+                a_top_left[i][j] = strassen_a[i][j];
+                a_top_right[i][j] = strassen_a[i][j+new_size];
+                a_bottom_left[i][j] = strassen_a[i + new_size][j];
+                a_bottom_right[i][j] = strassen_a[i + new_size][j + new_size];
+
+                b_top_left[i][j] = strassen_b[i][j];
+                b_top_right[i][j] = strassen_b[i][j+new_size];
+                b_bottom_left[i][j] = strassen_b[i + new_size][j];
+                b_bottom_right[i][j] = strassen_b[i + new_size][j + new_size];
+            }
+        }
+
+	    // 3. you also need the various tempmatricess to hold the 7 terms M1 .. M7 from whcih you will construct matrix c quadrants
+        vector<vector<int>> M1(new_size, vector<int>(new_size));
+        vector<vector<int>> M2(new_size, vector<int>(new_size));
+        vector<vector<int>> M3(new_size, vector<int>(new_size));
+        vector<vector<int>> M4(new_size, vector<int>(new_size));
+        vector<vector<int>> M5(new_size, vector<int>(new_size));
+        vector<vector<int>> M6(new_size, vector<int>(new_size));
+        vector<vector<int>> M7(new_size, vector<int>(new_size));
+
+        vector<vector<int>> temp1(new_size, vector<int>(new_size));
+        vector<vector<int>> temp2(new_size, vector<int>(new_size));
+        
+	    // 4. In total you will need 7 multiplications and 18 additions, use the helper functions.
+        //m1
+        strassen_add(a_top_left, a_bottom_right, temp1, new_size);
+        strassen_add(b_top_left, b_bottom_right, temp2, new_size);
+        multiply_vec(temp1, temp2, M1, new_size);
+        //m2
+        strassen_add(a_bottom_left, a_bottom_right, temp1, new_size);
+        multiply_vec(temp1, b_top_left, M2, new_size);
+        //m3
+        strassen_sub(b_top_right, b_bottom_right, temp1, new_size);
+        multiply_vec(temp1, a_top_left, M3, new_size);
+        //m4
+        strassen_add(b_bottom_left, b_top_left, temp1, new_size);
+        multiply_vec(temp1, a_bottom_right, M4, new_size);
+        //m5
+        strassen_add(a_top_left, a_bottom_right, temp1, new_size);
+        multiply_vec(temp1, b_bottom_right, M5, new_size);
+        //m6
+        strassen_sub(a_bottom_right, a_top_left, temp1, new_size);
+        strassen_add(b_top_left, b_bottom_left, temp2, new_size);
+        multiply_vec(temp1, temp2, M6, new_size);
+        //m7
+        strassen_sub(a_top_right, a_bottom_right, temp1, new_size);
+        strassen_add(b_bottom_left, b_bottom_right, temp2, new_size);
+        multiply_vec(temp1, temp2, M7, new_size);
+	    // 5. finally put the 4 quadrant in strassen_c
+    }
 	
-	// 2. otherwise, you need to make the 8 quadrants matrices out of a and b, fill them out
-	// 3. you also need the various tempmatricess to hold the 7 terms M1 .. M7 from whcih you will construct matrix c quadrants
-	// 4. In total you will need 7 multiplications and 18 additions, use the helper functions.
-	// 5. finally put the 4 quadrant in strassen_c
 
 }

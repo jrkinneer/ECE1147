@@ -3,13 +3,18 @@
         {
             "type": "cppbuild",
             "label": "C/C++: g++.exe build active file",
-            "command": "C:\\MinGW\\bin\\g++.exe",
+            // "command": "C:\\MinGW\\bin\\g++.exe",
+            "command": "C:\\msys64\\mingw64\\bin\\g++.exe",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
                 "Matrix Multiplication.cpp",
+                //"test.cpp",
                 "-o",
-                "C:\\Users\\jrkin\\ECE1147\\ECE1147\\HW6\\Matrix Multiplication.exe"
+                // "C:\\Users\\jrkin\\ECE1147\\ECE1147\\HW6\\Matrix Multiplication.exe"
+                 "C:\\Users\\jrkin\\ECE1147\\HW6\\Matrix Multiplication.exe"
+                //"C:\\Users\\jrkin\\ECE1147\\HW6\\test.exe"
+
             ],
             "options": {
                 "cwd": "${fileDirname}"
