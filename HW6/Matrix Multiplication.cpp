@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <math.h>
 
 void strassen(vector<vector<int>> &strassen_a, vector<vector<int>> &strassen_b, vector<vector<int>> &strassen_c, int size);
 void test(vector<double> &times,int MATRIX_SIZE);
@@ -48,7 +49,7 @@ void test(vector<double> &times,int MATRIX_SIZE){
     //Declare three matrices
     vector<vector<int>> matrix_a(MATRIX_SIZE, vector<int>(MATRIX_SIZE));
     vector<vector<int>> matrix_b(MATRIX_SIZE, vector<int>(MATRIX_SIZE));
-    vector<vector<int>> matrix_c(MATRIX_SIZE, vector<int>(MATRIX_SIZE));
+    vector<vector<float>> matrix_c(MATRIX_SIZE, vector<float>(MATRIX_SIZE));
     //Initialize the matrices with random numbers between 0 and 20
     for(int i = 0; i < MATRIX_SIZE; i++){
         for(int j = 0; j < MATRIX_SIZE; j++){
@@ -67,15 +68,16 @@ void test(vector<double> &times,int MATRIX_SIZE){
 
     // TODO
     // implement Brute Force matrix multiplication here
+    //std::cout<<"matrix_c = " << std::endl;
     for (int i = 0; i < MATRIX_SIZE; i++){
         for (int j = 0; j < MATRIX_SIZE; j++){
             matrix_c[i][j] = 0;
             for (int k = 0; k < MATRIX_SIZE; k++){
                 matrix_c[i][j] += matrix_a[i][k] * matrix_b[k][j];
             }
-            // printf("%d\t", matrix_c[i][j]);
+            //std::cout<<matrix_c[i][j]<<"\t";
         }
-        // printf("\n");
+        //std::cout<<"\n";
     }
     
     clock_t end = clock();
@@ -97,38 +99,47 @@ void test(vector<double> &times,int MATRIX_SIZE){
 	// TODO:
 	// Generate a random vector of indices with the matrix size
 	// look how to use std::random_shuffle
-    vector<int> columns;
-    vector<int> rows;
+    vector<int> all_indices;
     for (int i = 0; i < MATRIX_SIZE; i++){
-        columns.push_back(i);
-        rows.push_back(i);
+        all_indices.push_back(i);
     }
-
-    std::random_shuffle(columns.begin(), columns.end());
-    std::random_shuffle(rows.begin(), rows.end());
-
-    vector<vector<int>> vector_C(MATRIX_SIZE, vector<int>(MATRIX_SIZE));
-    vector<vector<int>> vector_R(MATRIX_SIZE, vector<int>(MATRIX_SIZE));
-    vector<vector<int>> vector_RC(MATRIX_SIZE, vector<int>(MATRIX_SIZE));
-
-    for (int i = 0; i < MATRIX_SIZE; i++){
-        for (int j = 0; j < MATRIX_SIZE; j++){
-            vector_C[i][j] = matrix_a[rows[i]][columns[j]];
-            vector_R[i][j] = matrix_b[rows[i]][columns[j]];
-        }
+    vector<int> selected_ind;
+    for (int i = 0; i < new_matrix_size; i++){
+        std::random_shuffle(all_indices.begin(), all_indices.end());
+        selected_ind.push_back(all_indices[0]);
     }
     
     //create new matrices C and R with the new samples cols and rows, and a new matrix CR to hold the approx product
     // don't forgoet to normalize as we did in the lecture.
+    vector<vector<float>> vector_C(MATRIX_SIZE, vector<float>(new_matrix_size));
+    vector<vector<float>> vector_R(new_matrix_size, vector<float>(MATRIX_SIZE));
+    vector<vector<float>> CR(MATRIX_SIZE, vector<float>(MATRIX_SIZE));
 
+
+    for (int i = 0; i < MATRIX_SIZE; i++){
+        for (int j = 0; j < new_matrix_size; j++){
+            double denom = 
+            vector_C[i][j] = matrix_a[i][selected_ind[j]];
+        }
+    }
+
+    for (int i = 0; i < new_matrix_size; i++){
+        for (int j = 0; j < MATRIX_SIZE; j++){
+            vector_R[i][j] = matrix_b[selected_ind[i]][j];
+        }
+    }
+    
     //multiply C and R using Brute Force.
+    //std::cout<<"CR = " << std::endl;
     for (int i = 0; i < MATRIX_SIZE; i++){
         for (int j = 0; j < MATRIX_SIZE; j++){
-            vector_RC[i][j] = 0;
-            for (int k = 0; k < MATRIX_SIZE; k++){
-                vector_RC[i][j] += vector_C[i][k] * vector_R[k][j];
+            CR[i][j] = 0;
+            for (int k = 0; k < new_matrix_size; k++){
+                CR[i][j] += vector_C[i][k] * vector_R[k][j];
             }
+            //std::cout<<CR[i][j]<<"\t";
         }
+        //std::cout<<"\n";
     }
     //end timing
     end = clock();
@@ -144,6 +155,18 @@ void test(vector<double> &times,int MATRIX_SIZE){
     //put the error in the error_uni varialbe defined below.
     
     float error_uni;
+    vector<vector<float>> difference(MATRIX_SIZE, vector<float>(MATRIX_SIZE));
+    
+    matrix_diff(CR, matrix_c, difference);
+    // std::cout<<"difference matrix = " << std::endl;
+    // for (int i = 0; i < MATRIX_SIZE; i++){
+    //     for (int j = 0; j < MATRIX_SIZE; j++){
+    //         std::cout<<difference[i][j]<<"\t";
+    //     }
+    //     std::cout<<"\n";
+    // }
+    error_uni = frobenius_norm (difference);
+
     std::cout << "Uniform Error: " << error_uni << std::endl;
 
     std::cout << "----------------------------------------------------" << std::endl;
@@ -193,7 +216,14 @@ void test(vector<double> &times,int MATRIX_SIZE){
 
 	//TODO:
     //multiply the new matrices using Brute Force.
-    
+    for (int i = 0; i < MATRIX_SIZE; i++){
+        for (int j = 0; j < MATRIX_SIZE; j++){
+            C_rand[i][j] = 0;
+            for (int k = 0; k < new_matrix_size; k++){
+                C_rand[i][j] += A_rand[i][k] * B_rand[k][j];
+            }
+        }
+    }
     //end timing
     end = clock();
 
@@ -208,8 +238,10 @@ void test(vector<double> &times,int MATRIX_SIZE){
     //put the error in the error_non_uni varialbe defined below.
     
     float error_non_uni;
+    vector<vector<float>> difference_2(MATRIX_SIZE, vector<float>(MATRIX_SIZE));
+    matrix_diff(C_rand, matrix_c, difference_2);
+    error_non_uni = frobenius_norm (difference_2);
     std::cout << "Non-Uniform Error: " << error_non_uni << std::endl;
-    
     
     //print section
     std::cout << "----------------------------------------------------" << std::endl;
@@ -234,7 +266,7 @@ void test(vector<double> &times,int MATRIX_SIZE){
 
     //TODO:
     // use the strassen fuction to multiply the strassen_a and strassen_b and put the result in strassen_c
-   
+    strassen(strassen_a, strassen_b, strassen_c, MATRIX_SIZE);
 
     //end timing
     end = clock();
@@ -339,6 +371,32 @@ void strassen(vector<vector<int>> &strassen_a, vector<vector<int>> &strassen_b, 
         strassen_add(b_bottom_left, b_bottom_right, temp2, new_size);
         multiply_vec(temp1, temp2, M7, new_size);
 	    // 5. finally put the 4 quadrant in strassen_c
+        vector<vector<int>> c11(new_size, vector<int>(new_size));
+        vector<vector<int>> c12(new_size, vector<int>(new_size));
+        vector<vector<int>> c21(new_size, vector<int>(new_size));
+        vector<vector<int>> c22(new_size, vector<int>(new_size));
+        //c11
+        strassen_add(M1, M4, temp1, new_size);
+        strassen_add(M5, M7, temp2, new_size);
+        strassen_sub(temp1, temp2, c11, new_size);
+        //c12
+        strassen_add(M3, M5, c12, new_size);
+        //c21
+        strassen_add(M2, M4, c21, new_size);
+        //c22
+        strassen_sub(M1, M2, temp1, new_size);
+        strassen_add(M3, M6, temp2, new_size);
+        strassen_add(temp1, temp2, c22, new_size);
+
+        //add all together into c
+        for (int i = 0; i < new_size; i++){
+            for (int j = 0; j < new_size; j++){
+                strassen_c[i][j] = c11[i][j];
+                strassen_c[i][j + new_size] = c12[i][j];
+                strassen_c[i + new_size][j] = c21[i][j];
+                strassen_c[i + new_size][j + new_size] = c22[i][j];
+            }
+        }
     }
 	
 

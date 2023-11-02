@@ -17,7 +17,7 @@
 
             ],
             "options": {
-                "cwd": "${fileDirname}"
+                "cwd": "C:\\Users\\jrkin\\ECE1147\\HW6"
             },
             "problemMatcher": [
                 "$gcc"
