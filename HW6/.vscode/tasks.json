@@ -12,9 +12,7 @@
                 //"test.cpp",
                 "-o",
                 // "C:\\Users\\jrkin\\ECE1147\\ECE1147\\HW6\\Matrix Multiplication.exe"
-                 "C:\\Users\\jrkin\\ECE1147\\HW6\\Matrix Multiplication.exe"
-                //"C:\\Users\\jrkin\\ECE1147\\HW6\\test.exe"
-
+                "C:\\Users\\jrkin\\ECE1147\\HW6\\Matrix Multiplication.exe"
             ],
             "options": {
                 "cwd": "C:\\Users\\jrkin\\ECE1147\\HW6"

@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <math.h>
+#include <thread>
 
 void strassen(vector<vector<int>> &strassen_a, vector<vector<int>> &strassen_b, vector<vector<int>> &strassen_c, int size);
 void test(vector<double> &times,int MATRIX_SIZE);
@@ -39,6 +40,63 @@ int main(){
 
 }
 
+//cache efficient brute force multiplication to speed up run time of all matrix multiplication functions
+void cache_efficient_mult(vector<vector<int>> &matrix_a, vector<vector<int>> &matrix_b, vector<vector<int>> &matrix_c, int n){
+    //square matrices of ints, for strassen
+    vector<int> Bcolj(n);
+    for(int j = 0; j < n; j++){
+        for (int k = 0; k < n; k++){
+            Bcolj[k] = matrix_b[k][j];
+        }
+        for (int i = 0; i< n; i++){
+            int s = 0;
+            for (int k = 0; k < n; k++){
+                s += matrix_a[i][k] * Bcolj[k];
+            }
+            matrix_c[j][i] = s;
+        }
+    }
+    return;
+}
+
+void cache_efficient_mult(vector<vector<float>> &matrix_a, vector<vector<float>> &matrix_b, vector<vector<float>> &matrix_c){
+    //uneven sized matrices for uniform and non uniform approximation
+    int n = matrix_a.size();
+    int s = matrix_a[0].size();
+    int m = matrix_b[0].size();
+    vector<float> Bcolj(s);
+    for(int j = 0; j < m; j++){
+        for (int k = 0; k < s; k++){
+            Bcolj[k] = matrix_b[k][j];
+        }
+        for (int i = 0; i< n; i++){
+            float sum = 0;
+            for (int k = 0; k < s; k++){
+                sum += matrix_a[i][k] * Bcolj[k];
+            }
+            matrix_c[j][i] = sum;
+        }
+    }
+    return;
+}
+
+void cache_efficient_mult(vector<vector<int>> &matrix_a, vector<vector<int>> &matrix_b, vector<vector<float>> &matrix_c, int n){
+    //square matrices of ints A and B into matrix of floats C, for brute force
+    vector<int> Bcolj(n);
+    for(int j = 0; j < n; j++){
+        for (int k = 0; k < n; k++){
+            Bcolj[k] = matrix_b[k][j];
+        }
+        for (int i = 0; i< n; i++){
+            float s = 0;
+            for (int k = 0; k < n; k++){
+                s += matrix_a[i][k] * Bcolj[k];
+            }
+            matrix_c[j][i] = s;
+        }
+    }
+    return;
+}
 
 void test(vector<double> &times,int MATRIX_SIZE){
     // multpliy two matrices of size MATRIX_SIZE and store the time taken for the operation in the times vector
@@ -79,13 +137,14 @@ void test(vector<double> &times,int MATRIX_SIZE){
         }
         //std::cout<<"\n";
     }
+    //cache_efficient_mult(matrix_a, matrix_b, matrix_c, MATRIX_SIZE);
     
     clock_t end = clock();
     double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
     std::cout << "Time spent: " << time_spent << " seconds" << std::endl;
     times.push_back(time_spent);
 
-   
+    
     //print section
     std::cout << "----------------------------------------------------" << std::endl;
     std::cout <<"Approximate Uniform\n";
@@ -141,6 +200,8 @@ void test(vector<double> &times,int MATRIX_SIZE){
         }
         //std::cout<<"\n";
     }
+    //cache_efficient_mult(vector_C, vector_R, CR);
+    
     //end timing
     end = clock();
     std::cout << "New matrix A\n";
@@ -224,6 +285,7 @@ void test(vector<double> &times,int MATRIX_SIZE){
             }
         }
     }
+    //cache_efficient_mult(A_rand, B_rand, C_rand);
     //end timing
     end = clock();
 
@@ -282,7 +344,6 @@ void test(vector<double> &times,int MATRIX_SIZE){
     
 }
 
-
 //matrix multiplication using strassen algorithm and divide and conquor
 void strassen(vector<vector<int>> &strassen_a, vector<vector<int>> &strassen_b, vector<vector<int>> &strassen_c, int size)
 {
@@ -292,47 +353,45 @@ void strassen(vector<vector<int>> &strassen_a, vector<vector<int>> &strassen_b, 
 	// all the matrices are of the same size which is the 4th parameter 
 	
 	// this will be the recursive algorithm discussed in the lecture. the following are some guidlines for you.
-	
-	
 	// 1. check if the size of the matrix is below the threshold use a threshold of 85 and calcualte that in brute force.
-	if (size < 85){
-        for (int i = 0; i < size; i++){
-            for (int j = 0; j < size; j++){
-                strassen_c[i][j] = 0;
-                for (int k = 0; k < size; k++){
-                    strassen_c[i][j] += strassen_a[i][k] * strassen_b[k][j];
-                }
-            }
-        }
+	if (size <= 256){
+        // for (int i = 0; i < size; i++){
+        //     for (int j = 0; j < size; j++){
+        //         strassen_c[i][j] = 0;
+        //         for (int k = 0; k < size; k++){
+        //             strassen_c[i][j] += strassen_a[i][k] * strassen_b[k][j];
+        //         }
+        //     }
+        // }
+        cache_efficient_mult(strassen_a, strassen_b, strassen_c, size);
         //brute force
         return;
     }
     else{
         // 2. otherwise, you need to make the 8 quadrants matrices out of a and b, fill them out
         int new_size = size/2;
-        vector<vector<int>> a_top_left(new_size, vector<int>(new_size));
-        vector<vector<int>> a_top_right(new_size, vector<int>(new_size));
-        vector<vector<int>> a_bottom_left(new_size, vector<int>(new_size));
-        vector<vector<int>> a_bottom_right(new_size, vector<int>(new_size));
-        vector<vector<int>> b_top_left(new_size, vector<int>(new_size));
-        vector<vector<int>> b_top_right(new_size, vector<int>(new_size));
-        vector<vector<int>> b_bottom_left(new_size, vector<int>(new_size));
-        vector<vector<int>> b_bottom_right(new_size, vector<int>(new_size));
+        vector<vector<int>> A11(new_size, vector<int>(new_size));
+        vector<vector<int>> A12(new_size, vector<int>(new_size));
+        vector<vector<int>> A21(new_size, vector<int>(new_size));
+        vector<vector<int>> A22(new_size, vector<int>(new_size));
+        vector<vector<int>> B11(new_size, vector<int>(new_size));
+        vector<vector<int>> B12(new_size, vector<int>(new_size));
+        vector<vector<int>> B21(new_size, vector<int>(new_size));
+        vector<vector<int>> B22(new_size, vector<int>(new_size));
 
         for (int i = 0; i < new_size; i++){
             for (int j = 0; j < new_size; j++){
-                a_top_left[i][j] = strassen_a[i][j];
-                a_top_right[i][j] = strassen_a[i][j+new_size];
-                a_bottom_left[i][j] = strassen_a[i + new_size][j];
-                a_bottom_right[i][j] = strassen_a[i + new_size][j + new_size];
+                A11[i][j] = strassen_a[i][j];
+                A12[i][j] = strassen_a[i][j+new_size];
+                A21[i][j] = strassen_a[i + new_size][j];
+                A22[i][j] = strassen_a[i + new_size][j + new_size];
 
-                b_top_left[i][j] = strassen_b[i][j];
-                b_top_right[i][j] = strassen_b[i][j+new_size];
-                b_bottom_left[i][j] = strassen_b[i + new_size][j];
-                b_bottom_right[i][j] = strassen_b[i + new_size][j + new_size];
+                B11[i][j] = strassen_b[i][j];
+                B12[i][j] = strassen_b[i][j+new_size];
+                B21[i][j] = strassen_b[i + new_size][j];
+                B22[i][j] = strassen_b[i + new_size][j + new_size];
             }
         }
-
 	    // 3. you also need the various tempmatricess to hold the 7 terms M1 .. M7 from whcih you will construct matrix c quadrants
         vector<vector<int>> M1(new_size, vector<int>(new_size));
         vector<vector<int>> M2(new_size, vector<int>(new_size));
@@ -342,48 +401,50 @@ void strassen(vector<vector<int>> &strassen_a, vector<vector<int>> &strassen_b, 
         vector<vector<int>> M6(new_size, vector<int>(new_size));
         vector<vector<int>> M7(new_size, vector<int>(new_size));
 
+	    // 4. In total you will need 7 multiplications and 18 additions, use the helper functions.
+
         vector<vector<int>> temp1(new_size, vector<int>(new_size));
         vector<vector<int>> temp2(new_size, vector<int>(new_size));
-        
-	    // 4. In total you will need 7 multiplications and 18 additions, use the helper functions.
         //m1
-        strassen_add(a_top_left, a_bottom_right, temp1, new_size);
-        strassen_add(b_top_left, b_bottom_right, temp2, new_size);
-        multiply_vec(temp1, temp2, M1, new_size);
+        strassen_add(A11, A22, temp1, new_size);
+        strassen_add(B11, B22, temp2, new_size);
+        strassen(temp1, temp2, M1, new_size);
         //m2
-        strassen_add(a_bottom_left, a_bottom_right, temp1, new_size);
-        multiply_vec(temp1, b_top_left, M2, new_size);
+        strassen_add(A21, A22, temp1, new_size);
+        strassen(temp1, B11, M2, new_size);
         //m3
-        strassen_sub(b_top_right, b_bottom_right, temp1, new_size);
-        multiply_vec(temp1, a_top_left, M3, new_size);
+        strassen_sub(B12, B22, temp1, new_size);
+        strassen(temp1, A11, M3, new_size);
         //m4
-        strassen_add(b_bottom_left, b_top_left, temp1, new_size);
-        multiply_vec(temp1, a_bottom_right, M4, new_size);
+        strassen_add(B21, B11, temp1, new_size);
+        strassen(temp1, A22, M4, new_size);
         //m5
-        strassen_add(a_top_left, a_bottom_right, temp1, new_size);
-        multiply_vec(temp1, b_bottom_right, M5, new_size);
+        strassen_add(A11, A22, temp1, new_size);
+        strassen(temp1, B22, M5, new_size);
         //m6
-        strassen_sub(a_bottom_right, a_top_left, temp1, new_size);
-        strassen_add(b_top_left, b_bottom_left, temp2, new_size);
-        multiply_vec(temp1, temp2, M6, new_size);
+        strassen_sub(A22, A11, temp1, new_size);
+        strassen_add(B11, B21, temp2, new_size);
+        strassen(temp1, temp2, M6, new_size);
         //m7
-        strassen_sub(a_top_right, a_bottom_right, temp1, new_size);
-        strassen_add(b_bottom_left, b_bottom_right, temp2, new_size);
-        multiply_vec(temp1, temp2, M7, new_size);
-	    // 5. finally put the 4 quadrant in strassen_c
+        strassen_sub(A12, A22, temp1, new_size);
+        strassen_add(B21, B22, temp2, new_size);
+        strassen(temp1, temp2, M7, new_size);
+        
+        
+	    // // 5. finally put the 4 quadrant in strassen_c
         vector<vector<int>> c11(new_size, vector<int>(new_size));
-        vector<vector<int>> c12(new_size, vector<int>(new_size));
-        vector<vector<int>> c21(new_size, vector<int>(new_size));
+        // vector<vector<int>> c12(new_size, vector<int>(new_size));
+        // vector<vector<int>> c21(new_size, vector<int>(new_size));
         vector<vector<int>> c22(new_size, vector<int>(new_size));
-        //c11
+        // //c11
         strassen_add(M1, M4, temp1, new_size);
         strassen_add(M5, M7, temp2, new_size);
         strassen_sub(temp1, temp2, c11, new_size);
-        //c12
-        strassen_add(M3, M5, c12, new_size);
-        //c21
-        strassen_add(M2, M4, c21, new_size);
-        //c22
+        // //c12
+        // strassen_add(M3, M5, c12, new_size);
+        // //c21
+        // strassen_add(M2, M4, c21, new_size);
+        // //c22
         strassen_sub(M1, M2, temp1, new_size);
         strassen_add(M3, M6, temp2, new_size);
         strassen_add(temp1, temp2, c22, new_size);
@@ -392,8 +453,8 @@ void strassen(vector<vector<int>> &strassen_a, vector<vector<int>> &strassen_b, 
         for (int i = 0; i < new_size; i++){
             for (int j = 0; j < new_size; j++){
                 strassen_c[i][j] = c11[i][j];
-                strassen_c[i][j + new_size] = c12[i][j];
-                strassen_c[i + new_size][j] = c21[i][j];
+                strassen_c[i][j + new_size] = M3[i][j] + M5[i][j];
+                strassen_c[i + new_size][j] = M2[i][j] + M4[i][j];
                 strassen_c[i + new_size][j + new_size] = c22[i][j];
             }
         }
