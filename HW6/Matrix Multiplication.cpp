@@ -127,17 +127,17 @@ void test(vector<double> &times,int MATRIX_SIZE){
     // TODO
     // implement Brute Force matrix multiplication here
     //std::cout<<"matrix_c = " << std::endl;
-    for (int i = 0; i < MATRIX_SIZE; i++){
-        for (int j = 0; j < MATRIX_SIZE; j++){
-            matrix_c[i][j] = 0;
-            for (int k = 0; k < MATRIX_SIZE; k++){
-                matrix_c[i][j] += matrix_a[i][k] * matrix_b[k][j];
-            }
-            //std::cout<<matrix_c[i][j]<<"\t";
-        }
-        //std::cout<<"\n";
-    }
-    //cache_efficient_mult(matrix_a, matrix_b, matrix_c, MATRIX_SIZE);
+    // for (int i = 0; i < MATRIX_SIZE; i++){
+    //     for (int j = 0; j < MATRIX_SIZE; j++){
+    //         matrix_c[i][j] = 0;
+    //         for (int k = 0; k < MATRIX_SIZE; k++){
+    //             matrix_c[i][j] += matrix_a[i][k] * matrix_b[k][j];
+    //         }
+    //         //std::cout<<matrix_c[i][j]<<"\t";
+    //     }
+    //     //std::cout<<"\n";
+    // }
+    cache_efficient_mult(matrix_a, matrix_b, matrix_c, MATRIX_SIZE);
     
     clock_t end = clock();
     double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
@@ -190,17 +190,17 @@ void test(vector<double> &times,int MATRIX_SIZE){
     
     //multiply C and R using Brute Force.
     //std::cout<<"CR = " << std::endl;
-    for (int i = 0; i < MATRIX_SIZE; i++){
-        for (int j = 0; j < MATRIX_SIZE; j++){
-            CR[i][j] = 0;
-            for (int k = 0; k < new_matrix_size; k++){
-                CR[i][j] += vector_C[i][k] * vector_R[k][j];
-            }
-            //std::cout<<CR[i][j]<<"\t";
-        }
-        //std::cout<<"\n";
-    }
-    //cache_efficient_mult(vector_C, vector_R, CR);
+    // for (int i = 0; i < MATRIX_SIZE; i++){
+    //     for (int j = 0; j < MATRIX_SIZE; j++){
+    //         CR[i][j] = 0;
+    //         for (int k = 0; k < new_matrix_size; k++){
+    //             CR[i][j] += vector_C[i][k] * vector_R[k][j];
+    //         }
+    //         //std::cout<<CR[i][j]<<"\t";
+    //     }
+    //     //std::cout<<"\n";
+    // }
+    cache_efficient_mult(vector_C, vector_R, CR);
     
     //end timing
     end = clock();
@@ -277,15 +277,15 @@ void test(vector<double> &times,int MATRIX_SIZE){
 
 	//TODO:
     //multiply the new matrices using Brute Force.
-    for (int i = 0; i < MATRIX_SIZE; i++){
-        for (int j = 0; j < MATRIX_SIZE; j++){
-            C_rand[i][j] = 0;
-            for (int k = 0; k < new_matrix_size; k++){
-                C_rand[i][j] += A_rand[i][k] * B_rand[k][j];
-            }
-        }
-    }
-    //cache_efficient_mult(A_rand, B_rand, C_rand);
+    // for (int i = 0; i < MATRIX_SIZE; i++){
+    //     for (int j = 0; j < MATRIX_SIZE; j++){
+    //         C_rand[i][j] = 0;
+    //         for (int k = 0; k < new_matrix_size; k++){
+    //             C_rand[i][j] += A_rand[i][k] * B_rand[k][j];
+    //         }
+    //     }
+    // }
+    cache_efficient_mult(A_rand, B_rand, C_rand);
     //end timing
     end = clock();
 
@@ -354,17 +354,8 @@ void strassen(vector<vector<int>> &strassen_a, vector<vector<int>> &strassen_b, 
 	
 	// this will be the recursive algorithm discussed in the lecture. the following are some guidlines for you.
 	// 1. check if the size of the matrix is below the threshold use a threshold of 85 and calcualte that in brute force.
-	if (size <= 256){
-        // for (int i = 0; i < size; i++){
-        //     for (int j = 0; j < size; j++){
-        //         strassen_c[i][j] = 0;
-        //         for (int k = 0; k < size; k++){
-        //             strassen_c[i][j] += strassen_a[i][k] * strassen_b[k][j];
-        //         }
-        //     }
-        // }
+	if (size <= 512){
         cache_efficient_mult(strassen_a, strassen_b, strassen_c, size);
-        //brute force
         return;
     }
     else{
