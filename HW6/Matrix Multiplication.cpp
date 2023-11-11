@@ -133,9 +133,7 @@ void test(vector<double> &times,int MATRIX_SIZE){
     //         for (int k = 0; k < MATRIX_SIZE; k++){
     //             matrix_c[i][j] += matrix_a[i][k] * matrix_b[k][j];
     //         }
-    //         //std::cout<<matrix_c[i][j]<<"\t";
     //     }
-    //     //std::cout<<"\n";
     // }
     cache_efficient_mult(matrix_a, matrix_b, matrix_c, MATRIX_SIZE);
     
