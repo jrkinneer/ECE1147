@@ -50,6 +50,7 @@ float euclidean_norm_cols(vector<vector<int>> &matrix, int col)
     }
     return sqrt(sum);
 }
+
 void matrix_diff(vector<vector<float>> &matrix_a, vector<vector<float>> &matrix_b, vector<vector<float>> &output)
 {
 	//subtracte two matrices
