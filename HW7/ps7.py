@@ -39,7 +39,7 @@ shingles_documents = np.array([[1,0,1,0],
                                [0,1,0,1],
                                [0,1,0,1],
                                [1,0,1,0],
-                               [1,0,1,0]])
+                               [1,0,1,0]], dtype='uint8')
 
 # test_perm = np.array([[1,3,2],
 #                       [2,1,3],
@@ -58,21 +58,41 @@ test_perm = np.array([[4,2,5],
                       [2,5,2]
                       ])
 
-def jaccard_sim(shingles):
-    jaccard_similarity = np.zeros((shingles.shape[1], shingles.shape[1]))
-    for i in range(shingles.shape[1]):
-        for j in range(i+1, shingles.shape[1]):
-            set1 = set(shingles[:, i])
-            set2 = set(shingles[:, j])
-            intersection = len(set1.intersection(set2))
-            union = len(set1.union(set2))
+def jaccard_sim(signature_matrix):
+    jaccard_similarity = np.zeros((signature_matrix.shape[1], signature_matrix.shape[1]))
+    for i in range(signature_matrix.shape[1]):
+        for j in range(i+1, signature_matrix.shape[1]):
+            set1 = signature_matrix[:, i]
+            set2 = signature_matrix[:, j]
+            intersection = 0
+            union = len(set1)
+            for k in range(len(set1)):
+                if set1[k] == set2[k]:
+                    intersection += 1
+                    
             similarity = intersection/union if union !=0 else 0
             jaccard_similarity[i,j] = similarity
             jaccard_similarity[j,i] = similarity
     return jaccard_similarity
 
-print(jaccard_sim(shingles_documents))
-# sig_mat = signature_matrix(shingles_documents, test_perm)
+def FPR_FNR(b, r, s, t):
+    
+    #prob that at least one band is identical using t
+    x = 1 - (1-(t**r))**b
+    #prob that at least one band is identical using s
+    y = 1 - (1-(s**r))**b
+    
+    FPR = 1 - y
+    FNR = y
+    
+    return (FPR, FNR)
+    
+    
+print(shingles_documents)
+sig_mat = signature_matrix(shingles_documents, test_perm)
+print(sig_mat)
+print(jaccard_sim(sig_mat))
+print(FPR_FNR(20,5,.8,.8))
 # print(sig_mat+1)
 # perm = generate_permutations(shingles_documents, 3)
 # print(perm)
