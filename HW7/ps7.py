@@ -1,11 +1,12 @@
 import hashlib
 import numpy as np
 
+#hash functions for random permutations
 def hash_function(data):
-    # You can use different hash functions based on your requirements
     hash_object = hashlib.sha256(data.encode())
     return int(hash_object.hexdigest(), 16)
 
+#generates permutations matrix
 def generate_permutations(shingles, num_functions):
     permutations = np.zeros((shingles.shape[0], num_functions)).astype('uint8')
     rows = [i for i in range(shingles.shape[0])]
@@ -19,6 +20,7 @@ def generate_permutations(shingles, num_functions):
 
     return permutations
 
+#creates signature matrix from shingles and permutations matrices
 def signature_matrix(shingles, permutations):
     signature_mat = np.zeros((permutations.shape[1], shingles.shape[1]))
     
@@ -31,8 +33,37 @@ def signature_matrix(shingles, permutations):
                  
     return signature_mat
 
-# Example usage:
+#gets jaccard similartiy of each column pair
+def jaccard_sim(signature_matrix):
+    jaccard_similarity = np.zeros((signature_matrix.shape[1], signature_matrix.shape[1]))
+    for i in range(signature_matrix.shape[1]):
+        for j in range(i+1, signature_matrix.shape[1]):
+            set1 = signature_matrix[:, i]
+            set2 = signature_matrix[:, j]
+            intersection = 0
+            union = len(set1)
+            for k in range(len(set1)):
+                if set1[k] == set2[k]:
+                    intersection += 1
+                    
+            similarity = intersection/union if union !=0 else 0
+            jaccard_similarity[i,j] = similarity
+            jaccard_similarity[j,i] = similarity
+    return jaccard_similarity
 
+#returns the false positive rate and false negative rate, in that order
+def FPR_FNR(b, r, s, t):
+    
+    #prob that at least one band is identical using t
+    x = 1 - (1-(t**r))**b
+    #prob that at least one band is identical using s
+    y = 1 - (1-(s**r))**b
+    
+    FPR = 1 - y
+    FNR = y
+    
+    return (FPR, FNR)
+   
 shingles_documents = np.array([[1,0,1,0],
                                [1,0,0,1],
                                [0,1,0,1],
@@ -56,42 +87,15 @@ test_perm = np.array([[4,2,5],
                       [5,6,6],
                       [3,4,4],
                       [2,5,2]
-                      ])
-
-def jaccard_sim(signature_matrix):
-    jaccard_similarity = np.zeros((signature_matrix.shape[1], signature_matrix.shape[1]))
-    for i in range(signature_matrix.shape[1]):
-        for j in range(i+1, signature_matrix.shape[1]):
-            set1 = signature_matrix[:, i]
-            set2 = signature_matrix[:, j]
-            intersection = 0
-            union = len(set1)
-            for k in range(len(set1)):
-                if set1[k] == set2[k]:
-                    intersection += 1
-                    
-            similarity = intersection/union if union !=0 else 0
-            jaccard_similarity[i,j] = similarity
-            jaccard_similarity[j,i] = similarity
-    return jaccard_similarity
-
-def FPR_FNR(b, r, s, t):
+                      ]) 
     
-    #prob that at least one band is identical using t
-    x = 1 - (1-(t**r))**b
-    #prob that at least one band is identical using s
-    y = 1 - (1-(s**r))**b
-    
-    FPR = 1 - y
-    FNR = y
-    
-    return (FPR, FNR)
-    
-    
-print(shingles_documents)
+#coding question 1a result
 sig_mat = signature_matrix(shingles_documents, test_perm)
 print(sig_mat)
+#coding question 1b result
 print(jaccard_sim(sig_mat))
+
+#coding question 1c result
 print(FPR_FNR(20,5,.8,.8))
 # print(sig_mat+1)
 # perm = generate_permutations(shingles_documents, 3)
