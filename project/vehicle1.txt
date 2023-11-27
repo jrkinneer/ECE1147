@@ -1,0 +1,40 @@
+Sedan
+Station Wagon/Sport Utility Vehicle
+PASSENGER VEHICLE
+SPORT UTILITY / STATION WAGON
+Taxi
+4 dr sedan
+Pick-up Truck
+TAXI
+VAN
+Box Truck
+OTHER
+Bus
+UNKNOWN
+Bike
+LARGE COM VEH(6 OR MORE TIRES)
+BUS
+SMALL COM VEH(4 TIRES)
+PICK-UP TRUCK
+LIVERY VEHICLE
+Tractor Truck Diesel
+Van
+Motorcycle
+Ambulance
+MOTORCYCLE
+Dump
+Convertible
+E-Bike
+2 dr sedan
+AMBULANCE
+PK
+Flat Bed
+Garbage or Refuse
+E-Scooter
+Carry All
+Moped
+Tractor Truck Gasoline
+Tow Truck / Wrecker
+FIRE TRUCK
+Chassis Cab
+Tanker
