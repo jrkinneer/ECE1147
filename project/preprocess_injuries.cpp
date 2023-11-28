@@ -8,6 +8,7 @@
 
 using namespace std;
 
+//parses one line of the csv to prevent internal commas from altering the amount of percieved cells
 vector<string> parseCSV(const string& line) {
     vector<string> result;
     stringstream ss(line);
@@ -85,7 +86,7 @@ int main()
 
     //open output data file
     ofstream outFile;
-    outFile.open("./project_data/data.csv");
+    outFile.open("./project_data/data_injuries.csv");
     if (outFile.is_open()) {
         cout << "outFile has been opened" << endl;
     }
@@ -129,7 +130,8 @@ int main()
             cell = cells[j];
             
             //get columns of interest
-            if (j == 1 || j == 3 || j==4 || j==5 || j == 11 || j==18 || j==19 || j==24 || j==25){
+            //j=10 is injuries
+            if (j == 1 || j == 3 || j==4 || j==5 || j == 10 || j==18 || j==19 || j==24 || j==25){
                 //handle blank/empty cell
                 if (cell.empty()){
                     if (j==18 || j==19 || j==24 || j==25){
