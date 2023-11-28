@@ -5,9 +5,9 @@ import pandas as pd
 import time
 from math import sqrt
 
-def rf_fatalities(T, depth):
+def rf_injuries(T, depth):
     '''
-        random forest function for motor vehicle accident data, trained on number of fatalities
+        random forest function for motor vehicle accident data, trained on number of injuries
 
         Parameters
         ----------
@@ -31,7 +31,7 @@ def rf_fatalities(T, depth):
         
     '''
     #get raw data
-    file_path = "./project_data/data.csv"
+    file_path = "./project_data/data_injuries.csv"
     raw_data = pd.read_csv(file_path, delimiter=',', on_bad_lines='skip')
     # (1609485, 10)
     # print("raw data shape: ", raw_data.shape)
@@ -41,24 +41,11 @@ def rf_fatalities(T, depth):
     # print("one hot encoding shape: ", features.shape)
     #(1609485, 206)
 
-    # print("\n")
-    # f = open("features.txt", "w")
-    # i = 0
-    # for col in features.columns:
-    #     try:
-    #         f.write(col)
-    #         f.write("\n")
-    #         i+=1
-    #     except:
-    #         print("error for feature")
-    # f.close()
-    # print("features = ", i)
-
     #isolate y variable
-    y = np.array(features['NUMBER OF PERSONS KILLED'])
+    y = np.array(features['NUMBER OF PERSONS INJURED'])
 
     #remove y variable from feature data
-    features = features.drop('NUMBER OF PERSONS KILLED', axis=1)
+    features = features.drop('NUMBER OF PERSONS INJURED', axis=1)
 
     feature_names = list(features.columns)
 
@@ -77,9 +64,6 @@ def rf_fatalities(T, depth):
     # Training Y Shape: (1287588,)
     # Testing Features Shape: (321897, 205)
     # Testing Y Shape: (321897,)
-    # [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 22 23 24
-    #  31 34 43]
-    # [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 19 22 24]
 
     #instantiate with T decision trees
     rf = RandomForestRegressor(n_estimators=T, random_state=42, max_depth=depth, verbose=2)
@@ -89,7 +73,7 @@ def rf_fatalities(T, depth):
     start = time.time()
     rf.fit(train_X, train_y)
     end = time.time()
-    training_time = end - start
+    training_time = end-start
     # print("model training finished, time elapsed = ", end - start)
 
     #use the test data
@@ -116,6 +100,6 @@ def rf_fatalities(T, depth):
     # Sort the feature importances by most important first
     feature_importances = sorted(feature_importances, key = lambda x: x[1], reverse = True)
     # Print out the feature and importances 
-    # [print('Variable: {:20} Importance: {}'.format(*pair)) for pair in feature_importances]
+    # [print('Variable: {:20} Importance: {}'.format(*pair)) for pair in feature_importances[:20]]
     
     return training_time, testing_time, mae, accuracy, feature_importances[:20]
