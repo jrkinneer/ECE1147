@@ -5,7 +5,7 @@ import pandas as pd
 import time
 from math import sqrt
 
-def rf_fatalities(T, depth):
+def rf_fatalities(T, num_features):
     '''
         random forest function for motor vehicle accident data, trained on number of fatalities
 
@@ -13,7 +13,7 @@ def rf_fatalities(T, depth):
         ----------
         T : (int) 
             the amount of trees in the forest
-        depth : (int) 
+        num_features : (int) 
             the number of features in each tree in the forest uses
         
         Returns
@@ -82,7 +82,8 @@ def rf_fatalities(T, depth):
     # [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 19 22 24]
 
     #instantiate with T decision trees
-    rf = RandomForestRegressor(n_estimators=T, random_state=42, max_depth=depth, verbose=2)
+    # rf = RandomForestRegressor(n_estimators=T, random_state=42, max_depth=depth, verbose=2)
+    rf = RandomForestRegressor(n_estimators=T, random_state=42, max_features=features, verbose=2)
     # print("forest instantiated with ", T , " trees")
 
     #train the model
