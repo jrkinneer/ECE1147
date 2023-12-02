@@ -3,9 +3,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 import pandas as pd
 import time
-from math import sqrt
 
-def rf_injuries(T, depth):
+def rf_injuries(T, num_features):
     '''
         random forest function for motor vehicle accident data, trained on number of injuries
 
@@ -13,7 +12,7 @@ def rf_injuries(T, depth):
         ----------
         T : (int) 
             the amount of trees in the forest
-        depth : (int) 
+        num_features : (int) 
             the number of features in each tree in the forest uses
         
         Returns
@@ -66,7 +65,9 @@ def rf_injuries(T, depth):
     # Testing Y Shape: (321897,)
 
     #instantiate with T decision trees
-    rf = RandomForestRegressor(n_estimators=T, random_state=42, max_depth=depth, verbose=2)
+    # rf = RandomForestRegressor(n_estimators=T, random_state=42, max_depth=depth, verbose=2)
+    rf = RandomForestRegressor(n_estimators=T, random_state=42, max_features=num_features, verbose=2)
+
     # print("forest instantiated with ", T , " trees")
 
     #train the model
@@ -85,6 +86,8 @@ def rf_injuries(T, depth):
 
     #testing errors
     errors = abs(predictions - test_y)
+    # non_zero_errors = len(np.where(errors > 0)[0])
+    # print("number of non zero errors: ", non_zero_errors, " , %", (non_zero_errors/errors.shape[0])*100)
     # print("Mean absolute error: ", round(np.mean(errors), 2))
 
     mae = sum(errors)/test_y.shape[0]
