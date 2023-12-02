@@ -3,7 +3,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 import pandas as pd
 import time
-from math import sqrt
 
 def rf_injuries(T, num_features):
     '''
@@ -87,6 +86,8 @@ def rf_injuries(T, num_features):
 
     #testing errors
     errors = abs(predictions - test_y)
+    # non_zero_errors = len(np.where(errors > 0)[0])
+    # print("number of non zero errors: ", non_zero_errors, " , %", (non_zero_errors/errors.shape[0])*100)
     # print("Mean absolute error: ", round(np.mean(errors), 2))
 
     mae = sum(errors)/test_y.shape[0]

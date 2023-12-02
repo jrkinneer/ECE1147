@@ -3,7 +3,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 import pandas as pd
 import time
-from math import sqrt
+from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 def rf_fatalities(T, num_features):
     '''
@@ -83,7 +84,7 @@ def rf_fatalities(T, num_features):
 
     #instantiate with T decision trees
     # rf = RandomForestRegressor(n_estimators=T, random_state=42, max_depth=depth, verbose=2)
-    rf = RandomForestRegressor(n_estimators=T, random_state=42, max_features=features, verbose=2)
+    rf = RandomForestRegressor(n_estimators=T, random_state=42, max_features=num_features, verbose=2)
     # print("forest instantiated with ", T , " trees")
 
     #train the model
@@ -99,9 +100,10 @@ def rf_fatalities(T, num_features):
     end = time.time()
     testing_time = end - start
     # print("model prediction finished, time elapsed = ", end - start)
-
     #testing errors
     errors = abs(predictions - test_y)
+    # non_zero_errors = len(np.where(errors > 0)[0])
+    # print("number of non zero errors: ", non_zero_errors, " , %", (non_zero_errors/errors.shape[0])*100)
     # print("Mean absolute error: ", round(np.mean(errors), 2))
 
     mae = sum(errors)/test_y.shape[0]

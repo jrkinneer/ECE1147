@@ -1,10 +1,9 @@
 from random_forest import rf_fatalities
 from random_forest_injuries import rf_injuries
 import numpy as np
-from tqdm import tqdm
 import pandas as pd
 
-T_list = [1, 10 , 25, 100]
+T_list = [2, 10 , 25, 100]
 
 #14 is the sqrt of the feature space (205)
 feature_subset_size = [3, 5, 10, 14, 25, 100, 205]
@@ -24,9 +23,10 @@ accuracies_injuries = np.zeros((len(T_list), len(feature_subset_size)))
 mae_injuries = np.zeros((len(T_list), len(feature_subset_size)))
 important_features_injuries = np.empty((len(T_list), len(feature_subset_size)), dtype=object)
 
-for i, T in tqdm(enumerate(T_list)):
+for i, T in enumerate(T_list):
     for j, feature_subset in enumerate(feature_subset_size):
         #fatalities
+        print("training fatalities")
         train, test, mae_, accuracy, features = rf_fatalities(T, feature_subset)
         training_times[i][j] = train
         testing_times[i][j] = test
@@ -35,6 +35,7 @@ for i, T in tqdm(enumerate(T_list)):
         important_features[i][j] = features
         
         #injuries
+        print("training injuries")
         train, test, mae_, accuracy, features = rf_injuries(T, feature_subset)
         training_times_injuries[i][j] = train
         testing_times_injuries[i][j] = test
