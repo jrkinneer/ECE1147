@@ -66,7 +66,7 @@ def rf_injuries(T, num_features):
 
     #instantiate with T decision trees
     # rf = RandomForestRegressor(n_estimators=T, random_state=42, max_depth=depth, verbose=2)
-    rf = RandomForestRegressor(n_estimators=T, random_state=42, max_features=num_features, verbose=2)
+    rf = RandomForestRegressor(n_estimators=T, random_state=42, max_features=num_features)
 
     # print("forest instantiated with ", T , " trees")
 
@@ -81,6 +81,7 @@ def rf_injuries(T, num_features):
     start = time.time()
     predictions = rf.predict(test_X)
     end = time.time()
+    
     testing_time = end - start
     # print("model prediction finished, time elapsed = ", end - start)
 
@@ -93,6 +94,7 @@ def rf_injuries(T, num_features):
     mae = sum(errors)/test_y.shape[0]
 
     accuracy = 100 - ((mae/np.max(test_y)) * 100)
+    r2 = rf.score(test_X, test_y)
 
     # print("accuracy = ", accuracy)
 
@@ -105,4 +107,4 @@ def rf_injuries(T, num_features):
     # Print out the feature and importances 
     # [print('Variable: {:20} Importance: {}'.format(*pair)) for pair in feature_importances[:20]]
     
-    return training_time, testing_time, mae, accuracy, feature_importances[:20]
+    return training_time, testing_time, mae, accuracy, r2, feature_importances[:20]

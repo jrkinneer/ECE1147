@@ -3,8 +3,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 import pandas as pd
 import time
-from tqdm import tqdm
-import matplotlib.pyplot as plt
 
 def rf_fatalities(T, num_features):
     '''
@@ -84,7 +82,7 @@ def rf_fatalities(T, num_features):
 
     #instantiate with T decision trees
     # rf = RandomForestRegressor(n_estimators=T, random_state=42, max_depth=depth, verbose=2)
-    rf = RandomForestRegressor(n_estimators=T, random_state=42, max_features=num_features, verbose=2)
+    rf = RandomForestRegressor(n_estimators=T, random_state=42, max_features=num_features)
     # print("forest instantiated with ", T , " trees")
 
     #train the model
@@ -99,6 +97,7 @@ def rf_fatalities(T, num_features):
     predictions = rf.predict(test_X)
     end = time.time()
     testing_time = end - start
+    
     # print("model prediction finished, time elapsed = ", end - start)
     #testing errors
     errors = abs(predictions - test_y)
@@ -109,7 +108,7 @@ def rf_fatalities(T, num_features):
     mae = sum(errors)/test_y.shape[0]
 
     accuracy = 100 - ((mae/np.max(test_y)) * 100)
-
+    r2 = rf.score(test_X, test_y)
     # print("accuracy = ", accuracy)
 
     #get most important features]
@@ -121,4 +120,4 @@ def rf_fatalities(T, num_features):
     # Print out the feature and importances 
     # [print('Variable: {:20} Importance: {}'.format(*pair)) for pair in feature_importances]
     
-    return training_time, testing_time, mae, accuracy, feature_importances[:20]
+    return training_time, testing_time, mae, accuracy, r2, feature_importances[:20]
